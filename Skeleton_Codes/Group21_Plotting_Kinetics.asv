@@ -38,7 +38,7 @@ F34_alpha = [];
 F16_alpha = [];
 F56_alpha = [];
 
-for theta2 = 0.01:0.1:4*pi
+for theta2 = 0.01:0.1:2*pi
 
 dtheta2 = 2;
 ddtheta2 = 0; 
@@ -87,12 +87,12 @@ ddbeta3 = -1*ddtheta3;
 inertiaG3 = (1/12)*m3*r3.^2;
 inertiaA2 = (1/3)*m2*r2.^2;
 inertiaA6 = (1/3)*m6*r6.^2;
+
 %shortcuts
 rGC = r5 - b3;
 rGB = r3./2;
 rDG = r3./2;
-%trig substitutions
-
+%trig substitutions for the A matrix
 A33 = -r2.*sin(theta2);
 A43 = r2.*cos(theta2);
 A134 = sin(theta6);
@@ -175,6 +175,8 @@ ag5y = ag6y.*2;
     F56y = x(10);
     F14y = x(11);
     N35 = x(13);
+    Fsx = F14x + F12x + F16x;
+    Fsy = F14y + 
     
     % Magnitudes of all forces: 
     % Atan is defined on [-pi/2; pi/2]. 
@@ -238,7 +240,7 @@ ag5y = ag6y.*2;
     % Collecting the values of theta2:
     theta2_list = [theta2_list; theta2];
      
-   %}
+    
     
 end
 
@@ -312,18 +314,29 @@ xlabel('\theta_2   unit: degree')
 ylabel('F_{14}   unit: N')
 hold on;
 
-%F14 Regular
+%F35 Regular
 subplot(3,3,8);
-plot(theta2_list.*(180/pi), F14_list)
+plot(theta2_list.*(180/pi), N35_list)
 grid on;
-title('F_{14} vs \theta_2')
+title('F_{35} vs \theta_2')
 xlabel('\theta_2   unit: degree')
-ylabel('F_{14}   unit: N')
-hold on;
+ylabel('F_{35}   unit: N')
+hold on
 
-%figure (4)
-%polarplot(Fij_alpha,Fij_list)
-%grid on;
-%title('F_{ij} polar plot')
+%Polar Plots
 
-% and so on ...
+%F23 plot
+figure(2)
+subplot(3,3,1)
+polarplot(F23_alpha,F23_list)
+grid on;
+title('F_{23} polar plot')
+hold on
+
+%F12 plot
+figure(2)
+subplot(3,3,1)
+polarplot(F23_alpha,F23_list)
+grid on;
+title('F_{23} polar plot')
+hold on

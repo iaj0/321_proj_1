@@ -2,8 +2,6 @@
 
 clear; clc; close all;
 
-
-
 %% Part 2 - Force and Moment Calculation
 
 %%initial parameter: unit: m, degree, rad/sec
@@ -20,13 +18,10 @@ b2 = r2/2;
 b6 = r6/2;
 b3 = r3/2;
 
-
-
-
 M12_list = [];
 theta2_list = [];
 Fs_list = [];  % shaking force
-alpha_s_list = []; % direction of a shaking force
+Fs_alpha = []; % direction of a shaking force
 Ms_list =[]; % Shaking moment
 %Forces list
 F23_list = [];
@@ -43,12 +38,7 @@ F34_alpha = [];
 F16_alpha = [];
 F56_alpha = [];
 
-
-
-for theta2 = 0.01:0.1:4*pi
-
-
-
+for theta2 = 0.01:0.1:2*pi
 
 dtheta2 = 2;
 ddtheta2 = 0; 
@@ -90,39 +80,39 @@ a_coriolis = abs((2.*(r6.*dtheta6.*cos(theta6)-r5.*(dtheta5).*cos(theta5)).*(r2.
 %given parameters
 
 beta3 = 2*pi-theta3;
+dbeta3 = -1*theta3;
+ddbeta3 = -1*ddtheta3;
 
 %inertias
 inertiaG3 = (1/12)*m3*r3.^2;
 inertiaA2 = (1/3)*m2*r2.^2;
 inertiaA6 = (1/3)*m6*r6.^2;
+
 %shortcuts
 rGC = r5 - b3;
 rGB = r3./2;
 rDG = r3./2;
-%trig substitutions
+%trig substitutions for the A matrix
 A33 = -r2.*sin(theta2);
-
 A43 = r2.*cos(theta2);
-A134 = sin(theta6);
-A135 = cos(theta6);
+A134 = -sin(beta3);
+A135 = -cos(beta3);
 A36 = rGB.*sin(beta3);
 A46 = rGB.*cos(beta3);
-A1311 = -sin(theta6);
-A1312 = -cos(theta6);
-A136 = (-sin(theta6).*sin(beta3));
+A1311 = sin(beta3);
+A1312 = cos(beta3);
+A136 = -rGC.*cos(theta6 + beta3);
 A66 = -rDG.*cos(beta3);
 A56 = -rDG.*sin(beta3);
 A99 = -r6.*sin(theta6);
-A109 = r6*(cos(theta6));
-
-
+A109 = r6.*(cos(theta6));
 
 %accelerations for forces
 ag2x = b2.*(-dtheta2.^2).*cos(theta2);
 ag2y = b2.*(-dtheta2.^2)*sin(theta2);
 
-ag3x = (b3.*(-dtheta3.^2).*cos(2*pi - beta3)) + ag2x;
-ag3y = (b3.*(ddtheta3).*sin(2*pi - beta3)) + ag2y;
+ag3x = (b3.*(-dbeta3.^2).*cos(2*pi - beta3)) + ag2x;
+ag3y = (b3.*(ddbeta3).*sin(2*pi - beta3)) + ag2y; 
 
 ag6x = b6.*(-ddtheta6.*sin(theta6)-(dtheta6.^2).*cos(theta6));
 ag6y = b6.*(ddtheta6.*cos(theta6)-(dtheta6.^2).*sin(theta6));
@@ -140,7 +130,7 @@ ag5y = ag6y.*2;
         0;
         m3.*ag3x;
         m3.*ag3y;
-        inertiaG3.*beta3;
+        inertiaG3.*ddtheta3; % wtf
         m6.*ag6x;
         m6.*ag6y;
         inertiaA6.*ddtheta6;
@@ -153,7 +143,7 @@ ag5y = ag6y.*2;
     A = [
     -1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
     0, -1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0;
-    0, 0, A33, A43, 0, 0, 0, 0, 0, 0, 1, 0, 0;
+    0, 0, A33, A43, 0, 0, 0, 0, 0, 0, 0, 1, 0;
     0, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, A134;
     0, 0, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, A135;
     0, 0, A36, A46, A56, A66, 0, 0, 0, 0, 0, 0, A136;
@@ -185,6 +175,10 @@ ag5y = ag6y.*2;
     F56y = x(10);
     F14y = x(11);
     N35 = x(13);
+    Fsx = F12x + F16x;
+    Fsy = F14y + F12y + F16y;
+    Ms = -M12 + F14y.*r4;
+
     
     % Magnitudes of all forces: 
     % Atan is defined on [-pi/2; pi/2]. 
@@ -197,9 +191,10 @@ ag5y = ag6y.*2;
     F56_list = [F56_list; sqrt(F56x.^2+F56y.^2)];
     F14_list = [F14_list; F14y];
     N35_list = [N35_list; N35];
+    Fs_list = [Fs_list; sqrt(Fsx.^2+Fsy.^2)];
+    Ms_list = [Ms_list; Ms];
 
 
-    
     % Directions of all forces:   
     %F23
     fx = F23x;
@@ -213,7 +208,7 @@ ag5y = ag6y.*2;
     %F12
     fx = F12x;
     fy = F12y;
-    alpha_12 = atan(fx\fy);
+    alpha_12 = atan2(fy, fx);
     if fx < 0
         alpha_12 = alpha_12 + pi;
     end 
@@ -246,11 +241,20 @@ ag5y = ag6y.*2;
     end 
     F56_alpha = [F56_alpha; alpha_56];
 
+    %Fs
+    fx = Fsx;
+    fy = Fsy;
+    alpha_s = atan(fx\fy);
+    if fx < 0
+        alpha_s = alpha_s + pi;
+    end 
+    Fs_alpha = [Fs_alpha; alpha_s];
+
   
     % Collecting the values of theta2:
-    theta2_list = [theta2_list, theta2];
+    theta2_list = [theta2_list; theta2];
      
-   %}
+    
     
 end
 
@@ -258,29 +262,95 @@ end
 % Regular and Polar plots:
 % Might have to transpose the Force vectors for polar plot. Do so if needed
 % Polar plot only works with radians so will have to do it accordingly
+%M12_list = M12_list(:);
 
-figure (1)
-plot(F23_list)
+%Regular Plots
+%M12 Regular
+subplot(3,3,1);
+plot(theta2_list.*(180/pi), M12_list)
 grid on;
 title('M_{12} vs \theta_2')
 xlabel('\theta_2   unit: degree')
 ylabel('M12   unit: N-m')
-hold
+hold on;
 
-figure (2)
-plot(theta2_list,F23_list)
+%F23 Regular
+subplot(3,3,2);
+plot(theta2_list.*(180/pi),F23_list)
 grid on;
-title('F_1_2 vs \theta_2')
+title('F_{23} vs \theta_2')
 xlabel('\theta_2   unit: degree')
-ylabel('M12   unit: N-m')
+ylabel('F_{23}   unit: N')
+hold on;
 
+%F12 Regular
+subplot(3,3,3);
+plot(theta2_list.*(180/pi), F12_list)
+grid on;
+title('F_{12} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{12}   unit: N')
+hold on;
 
-% Convert degrees to the radians
-theta2_rad = deg2rad(theta2_list);
+%F34 Regular
+subplot(3,3,4);
+plot(theta2_list.*(180/pi), F34_list)
+grid on;
+title('F_{34} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{34}   unit: N')
+hold on;
 
-%figure (4)
-%polarplot(Fij_alpha,Fij_list)
-%grid on;
-%title('F_{ij} polar plot')
+%F16 Regular
+subplot(3,3,5);
+plot(theta2_list.*(180/pi), F16_list)
+grid on;
+title('F_{16} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{16}   unit: N')
+hold on;
 
-% and so on ...
+%F56 Regular
+subplot(3,3,6);
+plot(theta2_list.*(180/pi), F56_list)
+grid on;
+title('F_{56} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{56}   unit: N')
+hold on;
+
+%F14 Regular
+subplot(3,3,7);
+plot(theta2_list.*(180/pi), F14_list)
+grid on;
+title('F_{14} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{14}   unit: N')
+hold on;
+
+%F35 Regular
+subplot(3,3,8);
+plot(theta2_list.*(180/pi), N35_list)
+grid on;
+title('F_{35} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{35}   unit: N')
+hold on
+
+%shaking moment and forces
+figure(2);
+subplot(2,1,1)
+plot(theta2_list.*(180/pi), Fs_list)
+grid on
+title('F_{s} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('F_{s}   unit: N')
+hold on
+
+subplot(2,1,2)
+plot(theta2_list.*(180/pi), Ms_list)
+grid on
+title('M_{s} vs \theta_2')
+xlabel('\theta_2   unit: degree')
+ylabel('M_{s}   unit: N')
+hold on
