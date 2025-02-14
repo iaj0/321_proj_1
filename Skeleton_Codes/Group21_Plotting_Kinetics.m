@@ -38,7 +38,7 @@ F34_alpha = [];
 F16_alpha = [];
 F56_alpha = [];
 
-for theta2 = 0.01:0.1:2*pi
+for theta2 = 0:0.01:2*pi
 
 dtheta2 = 2;
 ddtheta2 = 0; 
@@ -84,9 +84,9 @@ dbeta3 = -1*theta3;
 ddbeta3 = -1*ddtheta3;
 
 %inertias
-inertiaG3 = (1/12)*m3*r3.^2;
-inertiaA2 = (1/3)*m2*r2.^2;
-inertiaA6 = (1/3)*m6*r6.^2;
+inertiaG3 = (1/12)*m3.*r3.^2;
+inertiaA2 = (1/3)*m2.*r2.^2;
+inertiaA6 = (1/3)*m6.*r6.^2;
 
 %shortcuts
 rGC = r5 - b3;
@@ -101,17 +101,17 @@ A36 = rGB.*sin(beta3);
 A46 = rGB.*cos(beta3);
 A1311 = sin(beta3);
 A1312 = cos(beta3);
-A136 = -rGC.*cos(theta6 + beta3);
+A136 = rGC.*((sin(beta3)).^2)+(cos(beta3)).^2*rGC;
 A66 = -rDG.*cos(beta3);
 A56 = -rDG.*sin(beta3);
 A99 = -r6.*sin(theta6);
 A109 = r6.*(cos(theta6));
 
 %accelerations for forces
-ag2x = b2.*(-dtheta2.^2).*cos(theta2);
-ag2y = b2.*(-dtheta2.^2)*sin(theta2);
+ag2x = b2.*-(dtheta2.^2).*cos(theta2);
+ag2y = b2.*-(dtheta2.^2).*sin(theta2);
 
-ag3x = (b3.*(-dbeta3.^2).*cos(2*pi - beta3)) + ag2x;
+ag3x = (b3.*-(dbeta3.^2).*cos(2*pi - beta3)) + ag2x;
 ag3y = (b3.*(ddbeta3).*sin(2*pi - beta3)) + ag2y; 
 
 ag6x = b6.*(-ddtheta6.*sin(theta6)-(dtheta6.^2).*cos(theta6));
@@ -156,7 +156,7 @@ ag5y = ag6y.*2;
     0, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0;
     ];
 
-    x = A\B % Ax = B, solution for x; note that in MATLAB: A\B = B/A
+    x = A\B; % Ax = B, solution for x; note that in MATLAB: A\B = B/A
     
     
     % M12:
