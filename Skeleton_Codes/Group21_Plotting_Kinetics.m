@@ -101,7 +101,7 @@ A36 = rGB.*sin(beta3);
 A46 = rGB.*cos(beta3);
 A1311 = sin(beta3);
 A1312 = cos(beta3);
-A136 = rGC.*((sin(beta3)).^2)+(cos(beta3)).^2*rGC;
+A136 = rGC;
 A66 = -rDG.*cos(beta3);
 A56 = -rDG.*sin(beta3);
 A99 = -r6.*sin(theta6);
@@ -161,7 +161,7 @@ ag5y = ag6y.*2;
     
     % M12:
     M12 = x(12);
-    M12_list = [M12_list; M12];
+    M12_list = [M12_list; abs(M12)];
     
     F12x = x(1);
     F12y = x(2);
@@ -189,10 +189,10 @@ ag5y = ag6y.*2;
     F34_list = [F34_list; sqrt(F34x.^2+F34y.^2)];
     F16_list = [F16_list; sqrt(F16x.^2+F16y.^2)];
     F56_list = [F56_list; sqrt(F56x.^2+F56y.^2)];
-    F14_list = [F14_list; F14y];
-    N35_list = [N35_list; N35];
+    F14_list = [F14_list; abs(F14y)];
+    N35_list = [N35_list; abs(N35)];
     Fs_list = [Fs_list; sqrt(Fsx.^2+Fsy.^2)];
-    Ms_list = [Ms_list; Ms];
+    Ms_list = [Ms_list; abs(Ms)];
 
 
     % Directions of all forces:   
