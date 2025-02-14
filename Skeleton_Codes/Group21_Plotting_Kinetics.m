@@ -38,7 +38,7 @@ F34_alpha = [];
 F16_alpha = [];
 F56_alpha = [];
 
-for theta2 = 0:0.01:2*pi
+for theta2 = 0.01:0.01:2*pi
 
 dtheta2 = 2;
 ddtheta2 = 0; 
@@ -80,7 +80,7 @@ a_coriolis = abs((2.*(r6.*dtheta6.*cos(theta6)-r5.*(dtheta5).*cos(theta5)).*(r2.
 %given parameters
 
 beta3 = 2*pi-theta3;
-dbeta3 = -1*theta3;
+dbeta3 = -1*dtheta3;
 ddbeta3 = -1*ddtheta3;
 
 %inertias
@@ -134,9 +134,9 @@ ag5y = ag6y.*2;
         m6.*ag6x;
         m6.*ag6y;
         inertiaA6.*ddtheta6;
-        -m4.*ag4x;
-        -m5.*ag5x;
-        -m5.*ag5y;
+        m4.*ag4x;
+        m5.*ag5x;
+        m5.*ag5y;
         0;
     ];
     
@@ -177,7 +177,7 @@ ag5y = ag6y.*2;
     N35 = x(13);
     Fsx = F12x + F16x;
     Fsy = F14y + F12y + F16y;
-    Ms = -M12 + F14y.*r4;
+    Ms = M12 + F14y.*r4;
 
     
     % Magnitudes of all forces: 
@@ -190,9 +190,12 @@ ag5y = ag6y.*2;
     F16_list = [F16_list; sqrt(F16x.^2+F16y.^2)];
     F56_list = [F56_list; sqrt(F56x.^2+F56y.^2)];
     F14_list = [F14_list; abs(F14y)];
+    F14y_list = [F14_list; abs(F14y)];
+
     N35_list = [N35_list; abs(N35)];
     Fs_list = [Fs_list; sqrt(Fsx.^2+Fsy.^2)];
     Ms_list = [Ms_list; abs(Ms)];
+
 
 
     % Directions of all forces:   
